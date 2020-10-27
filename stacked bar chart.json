@@ -1,0 +1,87 @@
+{
+  "$schema": "https://vega.github.io/schema/vega-lite/v4.json",
+  "width": 800,
+  "height": 600,
+  "title": "Wildlife Trade",
+  "data": {
+    "url": "https://raw.githubusercontent.com/XuanErinChen/W10Interactive-Charts/main/animal_trade.csv"
+  },
+  "params": [
+    {
+      "name": "Appendix_selection",
+      "bind": {
+        "input": "select",
+        "options": [null, "I", "II", "III"],
+        "labels": ["Show All", "Appendix I", "Appendix II", "Appendix III"],
+        "name": "Appendix: "
+      }
+    }
+  ],
+  "transform": [
+    {"filter": "datum.Year == 2016"},
+    {"filter": "Appendix_selection == null || datum.App ==Appendix_selection"},
+    {
+      "joinaggregate": [
+        {"op": "sum", "field": "Importer reported quantity", "as": "Importsum"},
+        {"op": "sum", "field": "Exporter reported quantity", "as": "Exportsum"}
+      ]
+    },
+    {
+      "calculate": "datum.Importsum+datum.Exportsum",
+      "as": "total number traded"
+    }
+  ],
+  "encoding": {
+    "x": {
+      "field": "total number traded",
+      "type": "quantitative",
+      "title": "Total qunatity traded (Import&Export)",
+      "axis": {"tickCount": 5, "format": ".1s"}
+    },
+    "y": {"field": "Purpose", "type": "nominal"}
+  },
+  "layer": [
+    {
+      "mark": "bar",
+      "encoding": {
+        "color": {"field": "Class", "type": "nominal"},
+        "tooltip": [
+          {"field": "Class", "type": "nominal"},
+          {
+            "field": "total number traded",
+            "type": "quantitative",
+            "format": ","
+          }
+        ]
+      }
+    },
+    {
+      "mark": {
+        "type": "text",
+        "align": "right",
+        "baseline": "middle",
+        "dx": -12,
+        "fontSize": 11.5,
+        "fontStyle": "italic"
+      },
+      "encoding": {
+        "opacity": {
+          "condition": {
+            "test": "datum['App'] == 'I' || datum['App'] =='II' || datum['APP'] == 'III'",
+            "value": 1
+          },
+          "value": 0
+        },
+        "tooltip": [
+          {"field": "Class", "type": "nominal"},
+          {
+            "field": "total number traded",
+            "type": "quantitative",
+            "format": ","
+          }
+        ]
+      }
+    }
+  ],
+  "config": {}
+}
